@@ -1,15 +1,25 @@
+
 <!DOCTYPE html>
 <html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Objekte und Variablen</title>
+</head>
 <body>
+  <h2>Meine Objekte</h2>
 
-<script>
-  
-let name = prompt("Name")
-alert("Hallo " + name)
-let age = prompt("Wie alt sind sie")
-alert("Hallo_" + name + age + "_Jahre alt")
-      
-</script>
+  <button id="button1">1</button>
+  <script>
+    let zahl = 1;
 
+    const button1 = document.getElementById("button1");
+    const objekt2 = document.getElementById("objekt2");
+
+    button1.addEventListener("click", function () {
+      zahl = zahl + 1;
+      objekt2.textContent = zahl;
+    });
+  </script>
 </body>
 </html>
