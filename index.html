@@ -1,329 +1,299 @@
 
-<div id="jarvis-pixel">
-  <h2>J.A.R.V.I.S. // PIXEL VISION</h2>
-  <p id="jpv-status">SYSTEM BEREIT</p>
-  <div class="jpv-buttons">
-    <button id="jpv-start">KAMERA STARTEN</button>
-    <button id="jpv-stop" disabled>STOPPEN</button>
-    <button id="jpv-full">VOLLBILD</button>
+<div id="jarvis-universe">
+  <div class="ju-header">
+    <div>
+      <div class="ju-logo">J.A.R.V.I.S.</div>
+      <div class="ju-sub">NEURAL PARTICLE INTERFACE</div>
+    </div>
+    <div id="ju-status">SYSTEM STANDBY</div>
   </div>
-  <div id="jpv-screen">
-    <video id="jpv-video" autoplay muted playsinline></video>
-    <canvas id="jpv-canvas" width="960" height="540"></canvas>
-    <div id="jpv-overlay">WARTEN AUF KAMERA</div>
-    <div id="jpv-gesture">GESTE: —</div>
+
+  <div id="ju-stage">
+    <canvas id="ju-world"></canvas>
+    <video id="ju-camera" autoplay muted playsinline></video>
+    <div class="ju-crosshair"></div>
+    <div class="ju-info">
+      <span id="ju-hands">HANDS: 0</span>
+      <span id="ju-particles">PARTICLES: 1,000,000</span>
+      <span id="ju-gesture">GESTURE: WAITING</span>
+    </div>
+    <div id="ju-center">JARVIS NEURAL CORE</div>
   </div>
-  <div id="jpv-stats">HÄNDE: 0 | FINGER: 0</div>
-  <div class="jpv-controls">
-    <label>ZOOM <span id="jpv-zval">1.0×</span>
-      <input id="jpv-zoom" type="range" min="1" max="2.5" step=".1" value="1">
-    </label>
-    <label>PIXELGRÖSSE <span id="jpv-pval">7</span>
-      <input id="jpv-pixel" type="range" min="2" max="18" value="7">
-    </label>
+
+  <div class="ju-actions">
+    <button id="ju-start">CAMERA CONNECT</button>
+    <button id="ju-stop">DISCONNECT</button>
+    <button id="ju-mode">ENERGY MODE</button>
+    <button id="ju-full">FULLSCREEN</button>
   </div>
-  <div class="jpv-buttons">
-    <button id="jpv-color">FARBE WECHSELN</button>
-    <button id="jpv-grid">RASTER AN/AUS</button>
-    <button id="jpv-reset">RESET</button>
+
+  <div class="ju-controls">
+    <label>PARTICLE POWER <input id="ju-power" type="range" min="0.3" max="3" step=".1" value="1"></label>
+    <label>ZOOM <input id="ju-zoom" type="range" min=".5" max="2.5" step=".1" value="1"></label>
   </div>
-  <div id="jpv-message">Warte auf Handbewegungen.</div>
-  <p class="jpv-help">
-    ZEIGEFINGER = CURSOR · PINCH = KLICK-EFFEKT<br>
-    OFFENE HAND = SCAN · FAUST = PARTIKEL<br>
-    DAUMEN HOCH = FARBE WECHSELN
-  </p>
+  <div id="ju-message">Waiting for neural connection.</div>
 </div>
 
 <style>
-#jarvis-pixel{
- --jp:#42f5ff;
- background:radial-gradient(ellipse at top,#102638,#030811 75%);
- color:#e9fcff;padding:18px;border:1px solid #42f5ff;
- border-radius:15px;font-family:Arial,sans-serif;
- max-width:1050px;margin:20px auto;text-align:center;
- box-shadow:0 0 30px #42f5ff20;
+#jarvis-universe{
+ background:#020409;color:#d8fbff;
+ border:1px solid #1c6474;border-radius:15px;
+ padding:14px;font-family:Arial,sans-serif;
+ max-width:1200px;margin:20px auto;
+ box-shadow:0 0 40px #00d9ff12;
 }
-#jarvis-pixel h2{color:var(--jp);letter-spacing:4px}
-#jarvis-pixel button{
- background:#092431;color:var(--jp);border:1px solid var(--jp);
- padding:11px 15px;margin:5px;border-radius:7px;
- font-weight:bold;cursor:pointer
+#jarvis-universe *{box-sizing:border-box}
+.ju-header{display:flex;justify-content:space-between;align-items:center;padding:8px 5px 15px}
+.ju-logo{font-size:25px;font-weight:bold;letter-spacing:6px;color:#55efff;text-shadow:0 0 15px #00dfff}
+.ju-sub{font-size:9px;letter-spacing:3px;color:#638e9c;margin-top:5px}
+#ju-status{font:11px monospace;color:#58f5ff}
+#ju-stage{
+ height:600px;max-height:75vh;min-height:350px;
+ background:#000;position:relative;overflow:hidden;
+ border:1px solid #15566a;border-radius:9px;
 }
-#jarvis-pixel button:hover{background:var(--jp);color:#001015}
-#jarvis-pixel button:disabled{opacity:.4;cursor:wait}
-#jpv-status{color:#a5c6d0;font:12px monospace}
-#jpv-screen{
- position:relative;width:100%;aspect-ratio:16/9;
- background:#02060b;overflow:hidden;border:1px solid var(--jp);
- border-radius:9px
+#ju-world{width:100%;height:100%;display:block}
+#ju-camera{display:none}
+.ju-crosshair{
+ position:absolute;left:50%;top:50%;
+ width:150px;height:150px;border:1px solid #36dfff22;
+ border-radius:50%;transform:translate(-50%,-50%);
+ pointer-events:none;
 }
-#jpv-video{display:none}
-#jpv-canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
-#jpv-overlay{
- position:absolute;top:12px;left:12px;
- font:11px monospace;color:var(--jp);pointer-events:none
+.ju-crosshair:before,.ju-crosshair:after{
+ content:"";position:absolute;background:#36dfff35;
 }
-#jpv-gesture{
- position:absolute;bottom:12px;left:50%;
- transform:translateX(-50%);background:#00151ddd;
- border:1px solid #42f5ff88;border-radius:20px;
- padding:8px 14px;font:12px monospace;white-space:nowrap
+.ju-crosshair:before{width:1px;height:180px;left:50%;top:-15px}
+.ju-crosshair:after{height:1px;width:180px;top:50%;left:-15px}
+.ju-info{
+ position:absolute;left:15px;right:15px;top:13px;
+ display:flex;justify-content:space-between;gap:10px;
+ font:10px monospace;color:#55eaff;
+ pointer-events:none;
 }
-#jpv-stats{font:18px monospace;color:var(--jp);padding:13px}
-.jpv-controls{display:grid;grid-template-columns:1fr 1fr;gap:15px;text-align:left}
-.jpv-controls label{font-size:12px;color:#b9d4df}
-.jpv-controls span{float:right;color:var(--jp)}
-.jpv-controls input{width:100%;accent-color:var(--jp);margin-top:10px}
-#jpv-message{padding:12px;color:#b9d4df;min-height:20px}
-.jpv-help{font:11px/1.8 monospace;color:#789ba9}
-@media(max-width:600px){.jpv-controls{grid-template-columns:1fr}#jarvis-pixel{padding:9px}}
+#ju-center{
+ position:absolute;bottom:18px;left:50%;
+ transform:translateX(-50%);
+ color:#5bdef1;font:10px monospace;
+ letter-spacing:3px;opacity:.6;
+ pointer-events:none;white-space:nowrap;
+}
+.ju-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+#jarvis-universe button{
+ background:#061923;color:#5cecff;
+ border:1px solid #267d8e;padding:11px 15px;
+ border-radius:6px;cursor:pointer;font-weight:bold;
+}
+#jarvis-universe button:hover{background:#0b3441}
+.ju-controls{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.ju-controls label{font-size:11px;color:#80b9c7}
+.ju-controls input{width:100%;accent-color:#39eaff}
+#ju-message{text-align:center;color:#6e9da9;font:11px monospace;padding:14px}
+@media(max-width:600px){
+ #ju-stage{height:450px}
+ .ju-info{font-size:8px}
+ .ju-controls{grid-template-columns:1fr}
+}
 </style>
 
 <script type="module">
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js";
 import {
- FilesetResolver,
- HandLandmarker
+ FilesetResolver,HandLandmarker
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 
 (()=>{
-const $=id=>document.getElementById("jpv-"+id);
-const video=$("video"),canvas=$("canvas");
-const ctx=canvas.getContext("2d");
-const W=960,H=540;
+const $=id=>document.getElementById("ju-"+id);
+const stage=$("stage"),video=$("camera");
+const COUNT=1000000;
 
-let stream=null,detector=null,running=false;
-let zoom=1,pixel=7,color=0,grid=true;
-let particles=[],lastGesture="",gestureStart=0,lastAction=0;
-let cursor={x:W/2,y:H/2};
-let lastFrame=-1;
+let renderer,scene,camera,cloud,geometry,material;
+let tracker=null,stream=null,running=false;
+let handX=0,handY=0,targetX=0,targetY=0;
+let spread=1,targetSpread=1;
+let rotation=0,targetRotation=0;
+let power=1,zoom=1,mode=0;
+let gesture="WAITING",lastGesture="";
+let lastVideoTime=-1,frame=0;
 
-const colors=["#42f5ff","#8cff42","#ff62d6","#ffb347"];
-const links=[
- [0,1],[1,2],[2,3],[3,4],
- [0,5],[5,6],[6,7],[7,8],
- [5,9],[9,10],[10,11],[11,12],
- [9,13],[13,14],[14,15],[15,16],
- [13,17],[17,18],[18,19],[19,20],[0,17]
-];
+const positions=new Float32Array(COUNT*3);
+const colors=new Float32Array(COUNT*3);
+const sizes=new Float32Array(COUNT);
 
-function dist(a,b){
- return Math.hypot(a.x-b.x,a.y-b.y);
+function randomSphere(){
+ const u=Math.random()*2-1;
+ const a=Math.random()*Math.PI*2;
+ const r=100*Math.cbrt(Math.random());
+ return [
+  r*Math.sqrt(1-u*u)*Math.cos(a),
+  r*u,
+  r*Math.sqrt(1-u*u)*Math.sin(a)
+ ];
 }
 
-function countFingers(p){
- let n=0;
+function init3D(){
+ scene=new THREE.Scene();
+ camera=new THREE.PerspectiveCamera(55,1,.1,1000);
+ camera.position.z=260;
+
+ renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ renderer.setClearColor(0x000000,1);
+ stage.insertBefore(renderer.domElement,stage.firstChild);
+ renderer.domElement.id="ju-renderer";
+ renderer.domElement.style.cssText="position:absolute;inset:0;width:100%;height:100%;";
+ $("world").style.display="none";
+
+ geometry=new THREE.BufferGeometry();
+ for(let i=0;i<COUNT;i++){
+  const p=randomSphere();
+  positions[i*3]=p[0];
+  positions[i*3+1]=p[1];
+  positions[i*3+2]=p[2];
+  sizes[i]=Math.random();
+  const c=new THREE.Color();
+  c.setHSL(.51+Math.random()*.06,.9,.45+Math.random()*.35);
+  colors[i*3]=c.r;
+  colors[i*3+1]=c.g;
+  colors[i*3+2]=c.b;
+ }
+ geometry.setAttribute("position",new THREE.BufferAttribute(positions,3));
+ geometry.setAttribute("color",new THREE.BufferAttribute(colors,3));
+
+ material=new THREE.PointsMaterial({
+  size:1.3,vertexColors:true,transparent:true,
+  opacity:.95,blending:THREE.AdditiveBlending,
+  depthWrite:false,sizeAttenuation:true
+ });
+
+ cloud=new THREE.Points(geometry,material);
+ scene.add(cloud);
+
+ const resize=()=>{
+  const w=stage.clientWidth,h=stage.clientHeight;
+  renderer.setSize(w,h,false);
+  camera.aspect=w/h;
+  camera.updateProjectionMatrix();
+ };
+ new ResizeObserver(resize).observe(stage);
+ resize();
+ animate();
+}
+
+function animate(){
+ requestAnimationFrame(animate);
+ if(!renderer)return;
+ frame++;
+
+ handX+=(targetX-handX)*.07;
+ handY+=(targetY-handY)*.07;
+ spread+=(targetSpread-spread)*.06;
+ rotation+=(targetRotation-rotation)*.05;
+
+ cloud.rotation.y=rotation;
+ cloud.rotation.x=handY*.25;
+ cloud.scale.setScalar(spread*power);
+ camera.position.z=260/zoom;
+
+ material.size=1.15+Math.sin(frame*.02)*.2;
+
+ renderer.render(scene,camera);
+}
+
+function getGesture(p){
+ const up=[];
  for(const [tip,joint] of [[8,6],[12,10],[16,14],[20,18]]){
-  if(p[tip].y<p[joint].y)n++;
+  up.push(p[tip].y<p[joint].y);
  }
- if(dist(p[4],p[17])>dist(p[3],p[17])*1.12)n++;
- return n;
+ const thumb=p[4].y<p[3].y;
+ const n=up.filter(Boolean).length+(thumb?1:0);
+ const pinch=Math.hypot(p[4].x-p[8].x,p[4].y-p[8].y)<.055;
+ if(pinch)return "PINCH";
+ if(n>=4)return "OPEN HAND";
+ if(n===0)return "FIST";
+ if(thumb&&n<=2)return "THUMBS UP";
+ return "HAND TRACKING";
 }
 
-function detectGesture(p){
- const n=countFingers(p);
- if(dist(p[4],p[8])<.055)return "PINCH";
- if(p[4].y<p[3].y&&n<=2)return "DAUMEN HOCH";
- if(n>=4)return "OFFENE HAND";
- if(n===0)return "FAUST";
- if(p[8].y<p[6].y&&n===1)return "ZEIGEFINGER";
- return "HAND ERKANNT";
-}
+function processHands(result){
+ const hands=result.landmarks||[];
+ $("hands").textContent="HANDS: "+hands.length;
 
-function spawn(x,y){
- for(let i=0;i<28;i++){
-  particles.push({
-   x,y,
-   vx:(Math.random()-.5)*7,
-   vy:(Math.random()-.5)*7,
-   life:45
-  });
+ if(!hands.length){
+  $("gesture").textContent="GESTURE: WAITING";
+  targetSpread=1;
+  return;
  }
-}
 
-function drawGrid(){
- if(!grid)return;
- ctx.strokeStyle="#42f5ff19";
- ctx.lineWidth=1;
- for(let x=0;x<W;x+=pixel*4){
-  ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
- }
- for(let y=0;y<H;y+=pixel*4){
-  ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
- }
-}
+ const p=hands[0];
+ const g=getGesture(p);
 
-function drawHands(hands,center){
- let total=0;
- for(const p of hands){
-  total+=countFingers(p);
-  const points=p.map(q=>({
-   x:(.5+(1-q.x-center.x)*zoom)*W,
-   y:(.5+(q.y-center.y)*zoom)*H
-  }));
+ // Invert horizontal movement: move hand right -> particle world left.
+ targetX=(.5-p[9].x)*2.8;
+ targetY=(.5-p[9].y)*1.8;
+ targetRotation=(p[5].x-p[17].x)*2.5;
 
-  ctx.strokeStyle=colors[color];
-  ctx.lineWidth=3;
-  for(const [a,b] of links){
-   ctx.beginPath();
-   ctx.moveTo(points[a].x,points[a].y);
-   ctx.lineTo(points[b].x,points[b].y);
-   ctx.stroke();
-  }
+ if(g==="OPEN HAND")targetSpread=1.8;
+ else if(g==="FIST")targetSpread=.45;
+ else if(g==="PINCH")targetSpread=.7;
+ else targetSpread=1;
 
-  for(let i=0;i<points.length;i++){
-   ctx.beginPath();
-   ctx.arc(points[i].x,points[i].y,[4,8,12,16,20].includes(i)?7:3,0,Math.PI*2);
-   ctx.fillStyle=[4,8,12,16,20].includes(i)?colors[color]:"#ffffff";
-   ctx.fill();
-  }
-
-  cursor=points[8];
-
-  ctx.fillStyle="#ffffff";
-  ctx.font="bold 13px monospace";
-  ctx.fillText("HAND",points[0].x+10,points[0].y-10);
- }
- $("stats").textContent=`HÄNDE: ${hands.length} | FINGER: ${total}`;
-}
-
-function drawParticles(){
- particles=particles.filter(p=>p.life-->0);
- for(const p of particles){
-  p.x+=p.vx;p.y+=p.vy;
-  p.vx*=.98;p.vy*=.98;
-  ctx.fillStyle=colors[color];
-  ctx.fillRect(p.x,p.y,5,5);
- }
-}
-
-function handleGesture(g){
- const now=performance.now();
  if(g!==lastGesture){
   lastGesture=g;
-  gestureStart=now;
+  $("message").textContent="GESTURE DETECTED: "+g;
+  if(g==="THUMBS UP")mode=(mode+1)%3;
  }
- if(now-gestureStart<250||now-lastAction<1000)return;
+ $("gesture").textContent="GESTURE: "+g;
 
- if(g==="DAUMEN HOCH"){
-  color=(color+1)%colors.length;
-  $("message").textContent="JARVIS: Farbmodus geändert.";
-  lastAction=now;
- }else if(g==="FAUST"){
-  spawn(cursor.x,cursor.y);
-  $("message").textContent="JARVIS: Partikel-Effekt aktiviert.";
-  lastAction=now;
- }else if(g==="OFFENE HAND"){
-  ctx.strokeStyle=colors[color];
-  ctx.lineWidth=5;
-  ctx.strokeRect(12,12,W-24,H-24);
-  $("message").textContent="JARVIS: Hand-Scan aktiv.";
-  lastAction=now;
- }else if(g==="PINCH"){
-  spawn(cursor.x,cursor.y);
-  $("message").textContent="JARVIS: Pinch erkannt – Klick-Effekt!";
-  lastAction=now;
+ if(hands.length>1){
+  const other=hands[1];
+  const d=Math.hypot(p[9].x-other[9].x,p[9].y-other[9].y);
+  targetSpread=THREE.MathUtils.clamp(.4+d*3,.5,2.3);
  }
-}
-
-function render(result){
- const hands=result.landmarks||[];
- let center={x:.5,y:.5};
- if(hands.length){
-  center={
-   x:hands.reduce((s,p)=>s+p[0].x,0)/hands.length,
-   y:hands.reduce((s,p)=>s+p[0].y,0)/hands.length
-  };
- }
-
- const sw=video.videoWidth/zoom;
- const sh=video.videoHeight/zoom;
- const sx=Math.max(0,Math.min(video.videoWidth-sw,center.x*video.videoWidth-sw/2));
- const sy=Math.max(0,Math.min(video.videoHeight-sh,center.y*video.videoHeight-sh/2));
-
- const small=document.createElement("canvas");
- small.width=Math.max(30,Math.round(W/pixel));
- small.height=Math.max(30,Math.round(H/pixel));
- const sc=small.getContext("2d");
- sc.drawImage(video,sx,sy,sw,sh,0,0,small.width,small.height);
-
- ctx.imageSmoothingEnabled=false;
- ctx.drawImage(small,0,0,W,H);
- ctx.imageSmoothingEnabled=true;
-
- drawGrid();
- drawHands(hands,center);
- drawParticles();
-
- if(hands.length){
-  const g=detectGesture(hands[0]);
-  $("gesture").textContent="GESTE: "+g;
-  handleGesture(g);
- }else{
-  $("gesture").textContent="GESTE: —";
-  $("stats").textContent="HÄNDE: 0 | FINGER: 0";
- }
-}
-
-function loop(){
- if(!running)return;
- if(video.readyState>=2&&video.currentTime!==lastFrame){
-  lastFrame=video.currentTime;
-  try{
-   render(detector.detectForVideo(video,performance.now()));
-  }catch(e){
-   $("status").textContent="Tracking-Fehler: "+e.message;
-  }
- }
- requestAnimationFrame(loop);
 }
 
 async function start(){
  try{
   $("start").disabled=true;
-  $("status").textContent="Kamera wird angefragt...";
+  $("status").textContent="REQUESTING CAMERA...";
   stream=await navigator.mediaDevices.getUserMedia({
    audio:false,
-   video:{
-    facingMode:"user",
-    width:{ideal:1280},
-    height:{ideal:720}
-   }
+   video:{facingMode:"user",width:1280,height:720}
   });
   video.srcObject=stream;
   await video.play();
 
-  $("status").textContent="Hand-KI wird geladen...";
+  $("status").textContent="LOADING HAND AI...";
   const vision=await FilesetResolver.forVisionTasks(
    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
   );
-
-  detector=await HandLandmarker.createFromOptions(vision,{
+  tracker=await HandLandmarker.createFromOptions(vision,{
    baseOptions:{
-    modelAssetPath:
-    "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+    modelAssetPath:"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
     delegate:"GPU"
    },
-   runningMode:"VIDEO",
-   numHands:2,
-   minHandDetectionConfidence:.65,
-   minHandPresenceConfidence:.6,
-   minTrackingConfidence:.6
+   runningMode:"VIDEO",numHands:2
   });
 
   running=true;
-  lastFrame=-1;
-  $("status").textContent="JARVIS ONLINE · HAND TRACKING AKTIV";
-  $("overlay").textContent="LIVE PIXEL VISION";
-  $("start").disabled=true;
+  $("status").textContent="NEURAL INTERFACE ONLINE";
   $("stop").disabled=false;
-  requestAnimationFrame(loop);
+  loop();
  }catch(e){
-  $("status").textContent="FEHLER: "+e.message;
+  $("status").textContent="ERROR: "+e.message;
+  $("start").disabled=false;
   if(stream)stream.getTracks().forEach(t=>t.stop());
   stream=null;
-  $("start").disabled=false;
  }
+}
+
+function loop(){
+ if(!running)return;
+ if(video.readyState>=2&&video.currentTime!==lastVideoTime){
+  lastVideoTime=video.currentTime;
+  processHands(tracker.detectForVideo(video,performance.now()));
+ }
+ requestAnimationFrame(loop);
 }
 
 function stop(){
@@ -331,54 +301,39 @@ function stop(){
  if(stream)stream.getTracks().forEach(t=>t.stop());
  stream=null;
  video.srcObject=null;
- if(detector){detector.close();detector=null;}
- ctx.clearRect(0,0,W,H);
- particles=[];
- $("status").textContent="KAMERA AUSGESCHALTET";
- $("overlay").textContent="WARTEN AUF KAMERA";
- $("gesture").textContent="GESTE: —";
- $("stats").textContent="HÄNDE: 0 | FINGER: 0";
+ if(tracker){tracker.close();tracker=null;}
+ targetSpread=1;targetX=0;targetY=0;
+ $("status").textContent="SYSTEM STANDBY";
+ $("gesture").textContent="GESTURE: WAITING";
+ $("hands").textContent="HANDS: 0";
  $("start").disabled=false;
  $("stop").disabled=true;
 }
 
 $("start").addEventListener("click",start);
 $("stop").addEventListener("click",stop);
-
-$("zoom").addEventListener("input",e=>{
- zoom=Number(e.target.value);
- $("zval").textContent=zoom.toFixed(1)+"×";
-});
-
-$("pixel").addEventListener("input",e=>{
- pixel=Number(e.target.value);
- $("pval").textContent=pixel+" px";
-});
-
-$("color").addEventListener("click",()=>{
- color=(color+1)%colors.length;
- $("message").textContent="Farbe: "+colors[color];
-});
-
-$("grid").addEventListener("click",()=>{
- grid=!grid;
- $("grid").textContent=grid?"RASTER AN/AUS":"RASTER AUS";
-});
-
-$("reset").addEventListener("click",()=>{
- zoom=1;pixel=7;color=0;grid=true;
- $("zoom").value=1;$("pixel").value=7;
- $("zval").textContent="1.0×";$("pval").textContent="7 px";
- $("message").textContent="Ansicht zurückgesetzt.";
-});
-
-$("full").addEventListener("click",async()=>{
- try{
-  if(!document.fullscreenElement)await $("screen").requestFullscreen();
-  else await document.exitFullscreen();
- }catch(e){
-  $("status").textContent="Vollbild nicht verfügbar.";
+$("power").addEventListener("input",e=>power=Number(e.target.value));
+$("zoom").addEventListener("input",e=>zoom=Number(e.target.value));
+$("mode").addEventListener("click",()=>{
+ mode=(mode+1)%3;
+ const palettes=[
+  [0.51,.9,.55],
+  [.32,.95,.5],
+  [.78,.9,.55]
+ ];
+ const [h,s,l]=palettes[mode];
+ for(let i=0;i<COUNT;i++){
+  const c=new THREE.Color().setHSL(h+Math.random()*.04,s,l+Math.random()*.25);
+  colors[i*3]=c.r;colors[i*3+1]=c.g;colors[i*3+2]=c.b;
  }
+ geometry.attributes.color.needsUpdate=true;
+ $("message").textContent="ENERGY MODE "+(mode+1);
 });
+$("full").addEventListener("click",async()=>{
+ if(!document.fullscreenElement)await stage.requestFullscreen();
+ else await document.exitFullscreen();
+});
+
+init3D();
 })();
 </script>
