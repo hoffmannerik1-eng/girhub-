@@ -1,4 +1,3 @@
-
 <div id="jarvis-universe">
   <div class="ju-header">
     <div>
@@ -14,7 +13,7 @@
     <div class="ju-crosshair"></div>
     <div class="ju-info">
       <span id="ju-hands">HANDS: 0</span>
-      <span id="ju-particles">PARTICLES: 1,000,000</span>
+      <span id="ju-particles">PARTICLES: 1,100,000</span>
       <span id="ju-gesture">GESTURE: WAITING</span>
     </div>
     <div id="ju-center">JARVIS NEURAL CORE</div>
@@ -22,73 +21,102 @@
 
   <div class="ju-actions">
     <button id="ju-start">CAMERA CONNECT</button>
-    <button id="ju-stop">DISCONNECT</button>
+    <button id="ju-stop" disabled>DISCONNECT</button>
     <button id="ju-mode">ENERGY MODE</button>
     <button id="ju-full">FULLSCREEN</button>
   </div>
 
   <div class="ju-controls">
-    <label>PARTICLE POWER <input id="ju-power" type="range" min="0.3" max="3" step=".1" value="1"></label>
-    <label>ZOOM <input id="ju-zoom" type="range" min=".5" max="2.5" step=".1" value="1"></label>
+    <label>PARTICLE POWER
+      <input id="ju-power" type="range" min="0.3" max="3" step=".1" value="1">
+    </label>
+    <label>ZOOM
+      <input id="ju-zoom" type="range" min=".5" max="2.5" step=".1" value="1">
+    </label>
   </div>
   <div id="ju-message">Waiting for neural connection.</div>
 </div>
 
 <style>
 #jarvis-universe{
- background:#020409;color:#d8fbff;
- border:1px solid #1c6474;border-radius:15px;
+ background:#020200;color:#fff4b0;
+ border:1px solid #80651c;border-radius:15px;
  padding:14px;font-family:Arial,sans-serif;
  max-width:1200px;margin:20px auto;
- box-shadow:0 0 40px #00d9ff12;
+ box-shadow:0 0 40px #ffbf0018;
 }
 #jarvis-universe *{box-sizing:border-box}
-.ju-header{display:flex;justify-content:space-between;align-items:center;padding:8px 5px 15px}
-.ju-logo{font-size:25px;font-weight:bold;letter-spacing:6px;color:#55efff;text-shadow:0 0 15px #00dfff}
-.ju-sub{font-size:9px;letter-spacing:3px;color:#638e9c;margin-top:5px}
-#ju-status{font:11px monospace;color:#58f5ff}
+.ju-header{
+ display:flex;justify-content:space-between;
+ align-items:center;padding:8px 5px 15px
+}
+.ju-logo{
+ font-size:25px;font-weight:bold;letter-spacing:6px;
+ color:#ffdc55;text-shadow:0 0 15px #ffbb00
+}
+.ju-sub{
+ font-size:9px;letter-spacing:3px;
+ color:#a58b43;margin-top:5px
+}
+#ju-status{font:11px monospace;color:#ffdb55}
 #ju-stage{
  height:600px;max-height:75vh;min-height:350px;
  background:#000;position:relative;overflow:hidden;
- border:1px solid #15566a;border-radius:9px;
+ border:1px solid #8c6c1b;border-radius:9px;
 }
 #ju-world{width:100%;height:100%;display:block}
 #ju-camera{display:none}
 .ju-crosshair{
  position:absolute;left:50%;top:50%;
- width:150px;height:150px;border:1px solid #36dfff22;
- border-radius:50%;transform:translate(-50%,-50%);
- pointer-events:none;
+ width:150px;height:150px;
+ border:1px solid #ffdc5525;border-radius:50%;
+ transform:translate(-50%,-50%);pointer-events:none;
 }
 .ju-crosshair:before,.ju-crosshair:after{
- content:"";position:absolute;background:#36dfff35;
+ content:"";position:absolute;background:#ffdc5530;
 }
-.ju-crosshair:before{width:1px;height:180px;left:50%;top:-15px}
-.ju-crosshair:after{height:1px;width:180px;top:50%;left:-15px}
+.ju-crosshair:before{
+ width:1px;height:180px;left:50%;top:-15px
+}
+.ju-crosshair:after{
+ height:1px;width:180px;top:50%;left:-15px
+}
 .ju-info{
  position:absolute;left:15px;right:15px;top:13px;
  display:flex;justify-content:space-between;gap:10px;
- font:10px monospace;color:#55eaff;
- pointer-events:none;
+ font:10px monospace;color:#ffdc55;pointer-events:none;
 }
 #ju-center{
  position:absolute;bottom:18px;left:50%;
  transform:translateX(-50%);
- color:#5bdef1;font:10px monospace;
- letter-spacing:3px;opacity:.6;
+ color:#e9bd40;font:10px monospace;
+ letter-spacing:3px;opacity:.7;
  pointer-events:none;white-space:nowrap;
 }
-.ju-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+.ju-actions{
+ display:flex;gap:8px;flex-wrap:wrap;
+ justify-content:center;margin:14px 0
+}
 #jarvis-universe button{
- background:#061923;color:#5cecff;
- border:1px solid #267d8e;padding:11px 15px;
+ background:#191300;color:#ffdc55;
+ border:1px solid #96751d;padding:11px 15px;
  border-radius:6px;cursor:pointer;font-weight:bold;
 }
-#jarvis-universe button:hover{background:#0b3441}
-.ju-controls{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.ju-controls label{font-size:11px;color:#80b9c7}
-.ju-controls input{width:100%;accent-color:#39eaff}
-#ju-message{text-align:center;color:#6e9da9;font:11px monospace;padding:14px}
+#jarvis-universe button:hover{background:#382900}
+#jarvis-universe button:disabled{
+ opacity:.4;cursor:not-allowed
+}
+.ju-controls{
+ display:grid;grid-template-columns:1fr 1fr;gap:20px
+}
+.ju-controls label{font-size:11px;color:#d9bd69}
+.ju-controls input{
+ width:100%;accent-color:#ffca28
+}
+#ju-message{
+ text-align:center;color:#b69a4a;
+ font:11px monospace;padding:14px
+}
 @media(max-width:600px){
  #ju-stage{height:450px}
  .ju-info{font-size:8px}
@@ -99,241 +127,512 @@
 <script type="module">
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js";
 import {
- FilesetResolver,HandLandmarker
+  FilesetResolver,
+  HandLandmarker
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 
 (()=>{
+"use strict";
+
 const $=id=>document.getElementById("ju-"+id);
-const stage=$("stage"),video=$("camera");
-const COUNT=1000000;
+const stage=$("stage");
+const video=$("camera");
+
+const COUNT=1100000;
 
 let renderer,scene,camera,cloud,geometry,material;
 let tracker=null,stream=null,running=false;
-let handX=0,handY=0,targetX=0,targetY=0;
+
+let handX=0,handY=0;
+let targetX=0,targetY=0;
+
 let spread=1,targetSpread=1;
 let rotation=0,targetRotation=0;
 let power=1,zoom=1,mode=0;
-let gesture="WAITING",lastGesture="";
-let lastVideoTime=-1,frame=0;
+
+let frame=0;
+let lastVideoTime=-1;
+
+let pendingGesture="";
+let pendingFrames=0;
+let activeGesture="WAITING";
+
+let spinMode=false;
+let attractMode=false;
 
 const positions=new Float32Array(COUNT*3);
 const colors=new Float32Array(COUNT*3);
-const sizes=new Float32Array(COUNT);
 
-function randomSphere(){
- const u=Math.random()*2-1;
- const a=Math.random()*Math.PI*2;
- const r=100*Math.cbrt(Math.random());
- return [
-  r*Math.sqrt(1-u*u)*Math.cos(a),
-  r*u,
-  r*Math.sqrt(1-u*u)*Math.sin(a)
- ];
+const palettes=[
+  {h:.135,s:.98,l:.66},
+  {h:.105,s:1,l:.55},
+  {h:.155,s:.85,l:.78}
+];
+
+function setPalette(index){
+  mode=index%palettes.length;
+  const p=palettes[mode];
+  const c=new THREE.Color();
+
+  for(let i=0;i<COUNT;i++){
+    c.setHSL(
+      p.h+(Math.random()-.5)*.035,
+      p.s,
+      Math.max(.35,Math.min(.9,p.l+(Math.random()-.5)*.2))
+    );
+
+    colors[i*3]=c.r;
+    colors[i*3+1]=c.g;
+    colors[i*3+2]=c.b;
+  }
+
+  geometry.attributes.color.needsUpdate=true;
+  $("message").textContent="ENERGY PALETTE "+(mode+1);
 }
 
 function init3D(){
- scene=new THREE.Scene();
- camera=new THREE.PerspectiveCamera(55,1,.1,1000);
- camera.position.z=260;
+  scene=new THREE.Scene();
 
- renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
- renderer.setClearColor(0x000000,1);
- stage.insertBefore(renderer.domElement,stage.firstChild);
- renderer.domElement.id="ju-renderer";
- renderer.domElement.style.cssText="position:absolute;inset:0;width:100%;height:100%;";
- $("world").style.display="none";
+  camera=new THREE.PerspectiveCamera(55,1,.1,1000);
+  camera.position.z=260;
 
- geometry=new THREE.BufferGeometry();
- for(let i=0;i<COUNT;i++){
-  const p=randomSphere();
-  positions[i*3]=p[0];
-  positions[i*3+1]=p[1];
-  positions[i*3+2]=p[2];
-  sizes[i]=Math.random();
+  renderer=new THREE.WebGLRenderer({
+    antialias:true,
+    alpha:false,
+    powerPreference:"high-performance"
+  });
+
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderer.setClearColor(0x000000,1);
+
+  stage.insertBefore(renderer.domElement,stage.firstChild);
+
+  renderer.domElement.style.cssText=
+    "position:absolute;inset:0;width:100%;height:100%;";
+
+  $("world").style.display="none";
+
+  geometry=new THREE.BufferGeometry();
+
   const c=new THREE.Color();
-  c.setHSL(.51+Math.random()*.06,.9,.45+Math.random()*.35);
-  colors[i*3]=c.r;
-  colors[i*3+1]=c.g;
-  colors[i*3+2]=c.b;
- }
- geometry.setAttribute("position",new THREE.BufferAttribute(positions,3));
- geometry.setAttribute("color",new THREE.BufferAttribute(colors,3));
 
- material=new THREE.PointsMaterial({
-  size:1.3,vertexColors:true,transparent:true,
-  opacity:.95,blending:THREE.AdditiveBlending,
-  depthWrite:false,sizeAttenuation:true
- });
+  for(let i=0;i<COUNT;i++){
+    const u=Math.random()*2-1;
+    const a=Math.random()*Math.PI*2;
+    const r=100*Math.cbrt(Math.random());
+    const q=Math.sqrt(1-u*u);
 
- cloud=new THREE.Points(geometry,material);
- scene.add(cloud);
+    positions[i*3]=r*q*Math.cos(a);
+    positions[i*3+1]=r*u;
+    positions[i*3+2]=r*q*Math.sin(a);
 
- const resize=()=>{
-  const w=stage.clientWidth,h=stage.clientHeight;
-  renderer.setSize(w,h,false);
-  camera.aspect=w/h;
-  camera.updateProjectionMatrix();
- };
- new ResizeObserver(resize).observe(stage);
- resize();
- animate();
+    c.setHSL(
+      .135+Math.random()*.035,
+      .98,
+      .48+Math.random()*.3
+    );
+
+    colors[i*3]=c.r;
+    colors[i*3+1]=c.g;
+    colors[i*3+2]=c.b;
+  }
+
+  geometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(positions,3)
+  );
+
+  geometry.setAttribute(
+    "color",
+    new THREE.BufferAttribute(colors,3)
+  );
+
+  material=new THREE.PointsMaterial({
+    size:1.7,
+    vertexColors:true,
+    transparent:true,
+    opacity:.95,
+    blending:THREE.AdditiveBlending,
+    depthWrite:false,
+    sizeAttenuation:true
+  });
+
+  cloud=new THREE.Points(geometry,material);
+  scene.add(cloud);
+
+  const resize=()=>{
+    const w=stage.clientWidth;
+    const h=stage.clientHeight;
+
+    renderer.setSize(w,h,false);
+    camera.aspect=w/h;
+    camera.updateProjectionMatrix();
+  };
+
+  new ResizeObserver(resize).observe(stage);
+  resize();
+
+  animate();
 }
 
 function animate(){
- requestAnimationFrame(animate);
- if(!renderer)return;
- frame++;
+  requestAnimationFrame(animate);
+  if(!renderer)return;
 
- handX+=(targetX-handX)*.07;
- handY+=(targetY-handY)*.07;
- spread+=(targetSpread-spread)*.06;
- rotation+=(targetRotation-rotation)*.05;
+  frame++;
 
- cloud.rotation.y=rotation;
- cloud.rotation.x=handY*.25;
- cloud.scale.setScalar(spread*power);
- camera.position.z=260/zoom;
+  // Flüssige Handbewegungen
+  handX+=(targetX-handX)*.13;
+  handY+=(targetY-handY)*.13;
+  spread+=(targetSpread-spread)*.075;
+  rotation+=(targetRotation-rotation)*.07;
 
- material.size=1.15+Math.sin(frame*.02)*.2;
+  // Handbewegung steuert die ganze Partikelwolke
+  cloud.position.x=handX*75;
+  cloud.position.y=handY*55;
 
- renderer.render(scene,camera);
+  cloud.rotation.y=rotation;
+  cloud.rotation.x=handY*.22;
+
+  // Zusätzliche Drehung bei der Zwei-Finger-Geste
+  if(spinMode){
+    cloud.rotation.z+=.008;
+  }
+
+  // Partikel sammeln sich beim Zeigefinger
+  if(attractMode){
+    cloud.scale.setScalar(spread*power*(1+Math.sin(frame*.035)*.035));
+  }else{
+    cloud.scale.setScalar(spread*power);
+  }
+
+  camera.position.z=260/zoom;
+
+  // Leicht pulsierender Leuchteffekt
+  material.size=1.55+Math.sin(frame*.035)*.25;
+  material.opacity=.88+Math.sin(frame*.025)*.08;
+
+  renderer.render(scene,camera);
+}
+
+// Abstand zwischen zwei Handpunkten
+function distance(a,b){
+  return Math.hypot(a.x-b.x,a.y-b.y);
+}
+
+// Fingererkennung anhand mehrerer Landmark-Punkte
+function fingerExtended(p,tip,pip){
+  const wrist=p[0];
+  const tipDistance=distance(p[tip],wrist);
+  const jointDistance=distance(p[pip],wrist);
+
+  return tipDistance>jointDistance*1.12;
+}
+
+function thumbExtended(p){
+  const tip=distance(p[4],p[5]);
+  const joint=distance(p[3],p[5]);
+  return tip>joint*1.12;
 }
 
 function getGesture(p){
- const up=[];
- for(const [tip,joint] of [[8,6],[12,10],[16,14],[20,18]]){
-  up.push(p[tip].y<p[joint].y);
- }
- const thumb=p[4].y<p[3].y;
- const n=up.filter(Boolean).length+(thumb?1:0);
- const pinch=Math.hypot(p[4].x-p[8].x,p[4].y-p[8].y)<.055;
- if(pinch)return "PINCH";
- if(n>=4)return "OPEN HAND";
- if(n===0)return "FIST";
- if(thumb&&n<=2)return "THUMBS UP";
- return "HAND TRACKING";
+  const index=fingerExtended(p,8,6);
+  const middle=fingerExtended(p,12,10);
+  const ring=fingerExtended(p,16,14);
+  const pinky=fingerExtended(p,20,18);
+  const thumb=thumbExtended(p);
+
+  const count=[index,middle,ring,pinky].filter(Boolean).length;
+
+  // Daumen und Zeigefinger nahe beieinander
+  if(distance(p[4],p[8])<.055){
+    return "PINCH";
+  }
+
+  if(thumb&&!index&&!middle&&!ring&&!pinky&&p[4].y<p[3].y){
+    return "THUMBS UP";
+  }
+
+  if(count===4&&thumb){
+    return "OPEN HAND";
+  }
+
+  if(count===0&&!thumb){
+    return "FIST";
+  }
+
+  if(index&&middle&&!ring&&!pinky){
+    return "PEACE";
+  }
+
+  if(index&&!middle&&!ring&&!pinky){
+    return "POINT";
+  }
+
+  if(count===3){
+    return "THREE FINGERS";
+  }
+
+  return "HAND TRACKING";
+}
+
+// Verhindert schnelles Umspringen zwischen Gesten
+function stabilizeGesture(raw){
+  if(raw===pendingGesture){
+    pendingFrames++;
+  }else{
+    pendingGesture=raw;
+    pendingFrames=0;
+  }
+
+  if(pendingFrames>=3&&activeGesture!==raw){
+    activeGesture=raw;
+    onGestureChanged(raw);
+  }
+
+  return activeGesture;
+}
+
+function onGestureChanged(g){
+  $("message").textContent="GESTURE DETECTED: "+g;
+
+  if(g==="THUMBS UP"){
+    setPalette((mode+1)%palettes.length);
+  }
+}
+
+function applyGesture(g){
+  spinMode=false;
+  attractMode=false;
+
+  switch(g){
+    case "OPEN HAND":
+      targetSpread=1.9;
+      break;
+
+    case "FIST":
+      targetSpread=.42;
+      break;
+
+    case "PINCH":
+      targetSpread=.55;
+      break;
+
+    case "PEACE":
+      targetSpread=1.35;
+      spinMode=true;
+      break;
+
+    case "POINT":
+      targetSpread=.65;
+      attractMode=true;
+      break;
+
+    case "THREE FINGERS":
+      targetSpread=1.5;
+      break;
+
+    default:
+      targetSpread=1;
+  }
 }
 
 function processHands(result){
- const hands=result.landmarks||[];
- $("hands").textContent="HANDS: "+hands.length;
+  const hands=result.landmarks||[];
 
- if(!hands.length){
-  $("gesture").textContent="GESTURE: WAITING";
-  targetSpread=1;
-  return;
- }
+  $("hands").textContent="HANDS: "+hands.length;
 
- const p=hands[0];
- const g=getGesture(p);
+  if(!hands.length){
+    targetSpread=1;
+    targetX=0;
+    targetY=0;
+    targetRotation=0;
+    pendingGesture="";
+    pendingFrames=0;
+    activeGesture="WAITING";
+    $("gesture").textContent="GESTURE: WAITING";
+    return;
+  }
 
- // Invert horizontal movement: move hand right -> particle world left.
- targetX=(.5-p[9].x)*2.8;
- targetY=(.5-p[9].y)*1.8;
- targetRotation=(p[5].x-p[17].x)*2.5;
+  const p=hands[0];
+  const raw=getGesture(p);
+  const g=stabilizeGesture(raw);
 
- if(g==="OPEN HAND")targetSpread=1.8;
- else if(g==="FIST")targetSpread=.45;
- else if(g==="PINCH")targetSpread=.7;
- else targetSpread=1;
+  // Handbewegung: rechts bewegen = Partikel nach links
+  targetX=(.5-p[9].x)*2.8;
+  targetY=(.5-p[9].y)*1.8;
 
- if(g!==lastGesture){
-  lastGesture=g;
-  $("message").textContent="GESTURE DETECTED: "+g;
-  if(g==="THUMBS UP")mode=(mode+1)%3;
- }
- $("gesture").textContent="GESTURE: "+g;
+  // Handneigung beeinflusst die Drehung
+  targetRotation=(p[5].x-p[17].x)*2.5;
 
- if(hands.length>1){
-  const other=hands[1];
-  const d=Math.hypot(p[9].x-other[9].x,p[9].y-other[9].y);
-  targetSpread=THREE.MathUtils.clamp(.4+d*3,.5,2.3);
- }
+  applyGesture(g);
+
+  $("gesture").textContent="GESTURE: "+g;
+
+  // Zwei Hände: Abstand zwischen den Händen kontrolliert die Größe
+  if(hands.length>1){
+    const other=hands[1];
+    const d=distance(p[9],other[9]);
+
+    targetSpread=THREE.MathUtils.clamp(
+      .4+d*3.2,
+      .5,
+      2.5
+    );
+  }
 }
 
 async function start(){
- try{
-  $("start").disabled=true;
-  $("status").textContent="REQUESTING CAMERA...";
-  stream=await navigator.mediaDevices.getUserMedia({
-   audio:false,
-   video:{facingMode:"user",width:1280,height:720}
-  });
-  video.srcObject=stream;
-  await video.play();
+  try{
+    if(!navigator.mediaDevices?.getUserMedia){
+      throw new Error("Camera requires HTTPS or localhost.");
+    }
 
-  $("status").textContent="LOADING HAND AI...";
-  const vision=await FilesetResolver.forVisionTasks(
-   "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
-  );
-  tracker=await HandLandmarker.createFromOptions(vision,{
-   baseOptions:{
-    modelAssetPath:"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-    delegate:"GPU"
-   },
-   runningMode:"VIDEO",numHands:2
-  });
+    $("start").disabled=true;
+    $("status").textContent="REQUESTING CAMERA...";
 
-  running=true;
-  $("status").textContent="NEURAL INTERFACE ONLINE";
-  $("stop").disabled=false;
-  loop();
- }catch(e){
-  $("status").textContent="ERROR: "+e.message;
-  $("start").disabled=false;
-  if(stream)stream.getTracks().forEach(t=>t.stop());
-  stream=null;
- }
+    stream=await navigator.mediaDevices.getUserMedia({
+      audio:false,
+      video:{
+        facingMode:"user",
+        width:{ideal:1280},
+        height:{ideal:720},
+        frameRate:{ideal:30,max:30}
+      }
+    });
+
+    video.srcObject=stream;
+    await video.play();
+
+    $("status").textContent="LOADING HAND AI...";
+
+    const vision=await FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+    );
+
+    const options={
+      baseOptions:{
+        modelAssetPath:
+          "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+        delegate:"GPU"
+      },
+      runningMode:"VIDEO",
+      numHands:2,
+      minHandDetectionConfidence:.65,
+      minHandPresenceConfidence:.65,
+      minTrackingConfidence:.65
+    };
+
+    try{
+      tracker=await HandLandmarker.createFromOptions(vision,options);
+    }catch(gpuError){
+      options.baseOptions.delegate="CPU";
+      tracker=await HandLandmarker.createFromOptions(vision,options);
+    }
+
+    running=true;
+
+    $("status").textContent="NEURAL INTERFACE ONLINE";
+    $("stop").disabled=false;
+    $("message").textContent="HAND TRACKING ACTIVE";
+
+    loop();
+
+  }catch(e){
+    $("status").textContent="ERROR: "+e.message;
+    $("message").textContent="Check camera permission and internet connection.";
+
+    $("start").disabled=false;
+
+    if(stream){
+      stream.getTracks().forEach(t=>t.stop());
+    }
+
+    stream=null;
+  }
 }
 
 function loop(){
- if(!running)return;
- if(video.readyState>=2&&video.currentTime!==lastVideoTime){
-  lastVideoTime=video.currentTime;
-  processHands(tracker.detectForVideo(video,performance.now()));
- }
- requestAnimationFrame(loop);
+  if(!running)return;
+
+  if(
+    video.readyState>=2&&
+    video.currentTime!==lastVideoTime
+  ){
+    lastVideoTime=video.currentTime;
+
+    try{
+      const result=tracker.detectForVideo(
+        video,
+        performance.now()
+      );
+
+      processHands(result);
+    }catch(e){
+      console.error("Hand tracking:",e);
+    }
+  }
+
+  requestAnimationFrame(loop);
 }
 
 function stop(){
- running=false;
- if(stream)stream.getTracks().forEach(t=>t.stop());
- stream=null;
- video.srcObject=null;
- if(tracker){tracker.close();tracker=null;}
- targetSpread=1;targetX=0;targetY=0;
- $("status").textContent="SYSTEM STANDBY";
- $("gesture").textContent="GESTURE: WAITING";
- $("hands").textContent="HANDS: 0";
- $("start").disabled=false;
- $("stop").disabled=true;
+  running=false;
+
+  if(stream){
+    stream.getTracks().forEach(t=>t.stop());
+  }
+
+  stream=null;
+  video.srcObject=null;
+
+  if(tracker){
+    tracker.close();
+    tracker=null;
+  }
+
+  targetSpread=1;
+  targetX=0;
+  targetY=0;
+  targetRotation=0;
+
+  $("status").textContent="SYSTEM STANDBY";
+  $("gesture").textContent="GESTURE: WAITING";
+  $("hands").textContent="HANDS: 0";
+  $("message").textContent="Neural connection closed.";
+
+  $("start").disabled=false;
+  $("stop").disabled=true;
 }
 
 $("start").addEventListener("click",start);
 $("stop").addEventListener("click",stop);
-$("power").addEventListener("input",e=>power=Number(e.target.value));
-$("zoom").addEventListener("input",e=>zoom=Number(e.target.value));
-$("mode").addEventListener("click",()=>{
- mode=(mode+1)%3;
- const palettes=[
-  [0.51,.9,.55],
-  [.32,.95,.5],
-  [.78,.9,.55]
- ];
- const [h,s,l]=palettes[mode];
- for(let i=0;i<COUNT;i++){
-  const c=new THREE.Color().setHSL(h+Math.random()*.04,s,l+Math.random()*.25);
-  colors[i*3]=c.r;colors[i*3+1]=c.g;colors[i*3+2]=c.b;
- }
- geometry.attributes.color.needsUpdate=true;
- $("message").textContent="ENERGY MODE "+(mode+1);
+
+$("power").addEventListener("input",e=>{
+  power=Number(e.target.value);
 });
+
+$("zoom").addEventListener("input",e=>{
+  zoom=Number(e.target.value);
+});
+
+$("mode").addEventListener("click",()=>{
+  setPalette((mode+1)%palettes.length);
+});
+
 $("full").addEventListener("click",async()=>{
- if(!document.fullscreenElement)await stage.requestFullscreen();
- else await document.exitFullscreen();
+  try{
+    if(!document.fullscreenElement){
+      await stage.requestFullscreen();
+    }else{
+      await document.exitFullscreen();
+    }
+  }catch(e){
+    $("message").textContent="Fullscreen unavailable.";
+  }
 });
 
 init3D();
+
 })();
 </script>
