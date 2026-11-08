@@ -2,24 +2,192 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Objekte und Variablen</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JARVIS – Hand Tracking</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#050b12;color:#42f5ff;
+ font-family:Arial,sans-serif;text-align:center;
+}
+h1{letter-spacing:5px;margin:22px}
+#status{color:#aaa;margin:12px}
+button{
+ background:#42f5ff;color:#001015;border:0;
+ padding:14px 25px;border-radius:8px;
+ font-weight:bold;cursor:pointer;font-size:16px;
+}
+#stage{
+ position:relative;width:min(95vw,1000px);
+ margin:20px auto;border:1px solid #42f5ff;
+ border-radius:12px;overflow:hidden;
+ background:#07121c;
+}
+video,canvas{width:100%;display:block}
+video{transform:scaleX(-1)}
+canvas{position:absolute;inset:0}
+#count{font-size:22px;margin:15px}
+</style>
 </head>
 <body>
-  <h2>Meine Objekte</h2>
+<h1>J.A.R.V.I.S.</h1>
+<div>HAND TRACKING SYSTEM</div>
+<p id="status">Kamera nicht aktiviert</p>
+<button id="start">KAMERA STARTEN</button>
+<div id="stage">
+ <video id="video" autoplay playsinline muted></video>
+ <canvas id="canvas"></canvas>
+</div>
+<div id="count">Erkannte Hände: 0 | Finger: 0</div>
 
-  <button id="button1">1</button>
-  <script>
-    let zahl = 1;
+<script type="module">
+import {
+ FilesetResolver,
+ HandLandmarker,
+ DrawingUtils
+} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 
-    const button1 = document.getElementById("button1");
-    const objekt2 = document.getElementById("objekt2");
+const video=document.getElementById("video");
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+const status=document.getElementById("status");
+const count=document.getElementById("count");
+const button=document.getElementById("start");
 
-    button1.addEventListener("click", function () {
-      zahl = zahl + 1;
-      objekt2.textContent = zahl;
-    });
-  </script>
+let tracker;
+let stream;
+
+const connections=[
+[0,1],[1,2],[2,3],[3,4],
+[0,5],[5,6],[6,7],[7,8],
+[5,9],[9,10],[10,11],[11,12],
+[9,13],[13,14],[14,15],[15,16],
+[13,17],[17,18],[18,19],[19,20],
+[0,17]
+];
+
+function fingerCount(points){
+ let total=0;
+ // Zeige die vier Finger anhand ihrer Fingerspitzen.
+ for(const [tip,pip] of [[8,6],[12,10],[16,14],[20,18]]){
+  if(points[tip].y<points[pip].y) total++;
+ }
+ // Daumen: Abstand zur Handfläche.
+ if(Math.hypot(
+  points[4].x-points[17].x,
+  points[4].y-points[17].y
+ )>Math.hypot(
+  points[3].x-points[17].x,
+  points[3].y-points[17].y
+ )) total++;
+ return total;
+}
+
+function draw(results){
+ canvas.width=video.videoWidth;
+ canvas.height=video.videoHeight;
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ let hands=0,fingers=0;
+
+ for(const points of results.landmarks||[]){
+  hands++;
+  fingers+=fingerCount(points);
+
+  ctx.lineWidth=5;
+  ctx.strokeStyle="#42f5ff";
+  ctx.fillStyle="#ffffff";
+
+  for(const [a,b] of connections){
+   ctx.beginPath();
+   ctx.moveTo(points[a].x*canvas.width,points[a].y*canvas.height);
+   ctx.lineTo(points[b].x*canvas.width,points[b].y*canvas.height);
+   ctx.stroke();
+  }
+
+  const names=["Daumen","Zeigefinger","Mittelfinger","Ringfinger","Kleiner Finger"];
+  const tips=[4,8,12,16,20];
+
+  tips.forEach((index,i)=>{
+   const p=points[index];
+   const x=p.x*canvas.width;
+   const y=p.y*canvas.height;
+
+   ctx.beginPath();
+   ctx.arc(x,y,9,0,Math.PI*2);
+   ctx.fill();
+   ctx.fillStyle="#42f5ff";
+   ctx.font="bold 16px Arial";
+   ctx.fillText(names[i],x+12,y-12);
+   ctx.fillStyle="#ffffff";
+  });
+ }
+
+ count.textContent=`Erkannte Hände: ${hands} | Erkannte Finger: ${fingers}`;
+}
+
+async function startCamera(){
+ try{
+  button.disabled=true;
+  status.textContent="Kamera wird gestartet...";
+
+  stream=await navigator.mediaDevices.getUserMedia({
+   video:{facingMode:"user",width:1280,height:720},
+   audio:false
+  });
+
+  video.srcObject=stream;
+  await video.play();
+
+  status.textContent="KI wird geladen...";
+
+  const vision=await FilesetResolver.forVisionTasks(
+   "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+  );
+
+  tracker=await HandLandmarker.createFromOptions(vision,{
+   baseOptions:{
+    modelAssetPath:
+    "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+    delegate:"GPU"
+   },
+   runningMode:"VIDEO",
+   numHands:2
+  });
+
+  status.textContent="JARVIS HAND TRACKING AKTIV";
+  button.textContent="KAMERA STOPPEN";
+  button.disabled=false;
+  button.onclick=stopCamera;
+  requestAnimationFrame(loop);
+
+ }catch(error){
+  status.textContent="Fehler: "+error.message;
+  button.disabled=false;
+ }
+}
+
+function loop(){
+ if(!tracker||video.readyState<2)return;
+ const results=tracker.detectForVideo(video,performance.now());
+ draw(results);
+ requestAnimationFrame(loop);
+}
+
+function stopCamera(){
+ if(stream)stream.getTracks().forEach(t=>t.stop());
+ stream=null;
+ tracker?.close();
+ tracker=null;
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ count.textContent="Erkannte Hände: 0 | Finger: 0";
+ status.textContent="Kamera ausgeschaltet";
+ button.textContent="KAMERA STARTEN";
+ button.onclick=startCamera;
+}
+
+button.onclick=startCamera;
+</script>
 </body>
 </html>
