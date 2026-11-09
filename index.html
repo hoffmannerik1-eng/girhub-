@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Partikelkreis</title>
+<style>
+  :root { --bg:#05060d; --fg:#e8f1ff; --accent:#5ff0e0; color-scheme:dark; box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg);
+    font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif; overflow:hidden; touch-action:none; }
+  canvas { position:fixed; inset:0; width:100%; height:100%; display:block; }
+  #video { position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; }
+  #start { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:16px; background:rgba(5,6,13,.85); text-align:center; padding:24px; z-index:2; }
+  #start h1 { font-size:clamp(28px,6vw,52px); margin:0; }
+  #start p { margin:0; max-width:34em; line-height:1.55; opacity:.8; }
+  button { font:inherit; font-size:18px; padding:13px 30px; border-radius:999px; border:2px solid var(--accent);
+    background:transparent; color:var(--accent); cursor:pointer; }
+  button:hover,button:focus-visible { background:var(--accent); color:#04120f; outline:none; }
+  button.sec { border-color:#6b7a99; color:#9fb0d0; font-size:15px; padding:9px 22px; }
+  #hud { position:fixed; left:16px; right:16px; bottom:calc(16px + env(safe-area-inset-bottom,0px)); font-size:14px;
+    opacity:.8; z-index:1; pointer-events:none; line-height:1.5; }
+  #msg { color:var(--accent); }
+  #dbg { position:fixed; right:12px; top:calc(12px + env(safe-area-inset-top,0px)); width:160px; height:90px;
+    border:1px solid #2a3350; opacity:.8; z-index:1; display:none; image-rendering:pixelated; }
+</style>
+</head>
+<body>
+<video id="video" playsinline muted></video>
+<canvas id="c"></canvas>
+<canvas id="dbg" width="160" height="90"></canvas>
+<div id="start">
+  <h1>Partikelkreis</h1>
+  <p>Bewege deine Hände vor der Kamera. Zwei Hände auseinander ziehen zoomt den Kreis, eine Faust zieht ihn zusammen, eine offene Hand lässt ihn explodieren, ein schneller Wisch löst Funken aus. Am besten mit hellem Licht und ruhigem Hintergrund.</p>
+  <button id="go">Kamera starten</button>
+  <button id="nocam" class="sec">Ohne Kamera mit Maus oder Finger</button>
+  <p id="err"></p>
+</div>
+<div id="hud"><span id="msg">Bereit</span><br>Zwei Hände: Abstand = Zoom · Faust: zusammenziehen · Offene Hand: explodieren · Schneller Wisch: Funken</div>
+
+<script>
+const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+const video = document.getElementById("video"), msg = document.getElementById("msg");
+const dbg = document.getElementById("dbg"), dctx = dbg.getContext("2d");
+let W, H, DPR;
+function resize(){ DPR = Math.min(devicePixelRatio||1,2); W = innerWidth; H = innerHeight;
+  cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+addEventListener("resize", resize); resize();
+
+const lerp = (a,b,t)=>a+(b-a)*t, dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const N = 2000;
+const P = Array.from({length:N},()=>({a:Math.random()*6.283, off:(Math.random()-.5)*2, layer:Math.random(),
+  x:W/2, y:H/2, vx:0, vy:0, size:.6+Math.random()*1.8, sp:.2+Math.random()*.8}));
+const base = ()=>Math.min(W,H);
+const S = {cx:W/2, cy:H/2, R:base()*.22, rot:0, rotV:.003, spread:.35, tcx:W/2, tcy:H/2, tR:base()*.22,
+           tSpread:.35, burst:0, hue:180, tips:[]};
+
+// ---------- Hand-Erkennung ohne Downloads: Hautfarbe + Bewegung ----------
+const GW = 160, GH = 90, off = document.createElement("canvas"); off.width = GW; off.height = GH;
+const octx = off.getContext("2d", {willReadFrequently:true});
+const prevY = new Uint8Array(GW*GH), mh = new Float32Array(GW*GH), mask = new Uint8Array(GW*GH), lab = new Int32Array(GW*GH);
+let camOn = false, camHands = [], lastHandsAt = 0, prevCent = [];
+
+function mapV(nx, ny){            // normierte Videokoordinate → Bildschirm (gespiegelt, cover)
+  const vw = video.videoWidth||1280, vh = video.videoHeight||720, sc = Math.max(W/vw,H/vh);
+  return {x: W/2 + ((1-nx)*vw - vw/2)*sc, y: H/2 + (ny*vh - vh/2)*sc};
+}
+
+function detect(){
+  octx.drawImage(video, 0, 0, GW, GH);
+  const d = octx.getImageData(0,0,GW,GH).data;
+  for (let i=0, j=0; i<GW*GH; i++, j+=4){
+    const r=d[j], g=d[j+1], b=d[j+2];
+    const Y = .299*r+.587*g+.114*b, Cr = (r-Y)*.713+128, Cb = (b-Y)*.564+128;
+    const skin = Y>45 && Cr>133 && Cr<178 && Cb>77 && Cb<128;
+    const moved = Math.abs(Y-prevY[i]) > 14; prevY[i] = Y;
+    mh[i] = moved ? 1 : mh[i]*.93;
+    mask[i] = (skin && mh[i] > .3) ? 1 : 0;
+  }
+  // Zusammenhängende Flächen finden
+  lab.fill(0); const comps = []; let id = 0; const stack = [];
+  for (let s=0; s<GW*GH; s++){
+    if (!mask[s] || lab[s]) continue;
+    id++; stack.push(s); lab[s] = id;
+    const px = []; 
+    while (stack.length){
+      const p = stack.pop(); px.push(p);
+      const x = p%GW, y = (p/GW)|0;
+      for (let dy=-2; dy<=2; dy+=2) for (let dx=-2; dx<=2; dx+=2){
+        const nx=x+dx, ny=y+dy;
+        if (nx<0||ny<0||nx>=GW||ny>=GH) continue;
+        const q = ny*GW+nx;
+        if (mask[q] && !lab[q]){ lab[q]=id; stack.push(q); }
+      }
+    }
+    if (px.length > 25) comps.push(px);
+  }
+  comps.sort((a,b)=>b.length-a.length);
+  const res = [];
+  for (const px of comps.slice(0,2)){
+    let sx=0, sy=0; for (const p of px){ sx += p%GW; sy += (p/GW)|0; }
+    const cx = sx/px.length, cy = sy/px.length;
+    let md=0, tx=cx, ty=cy;
+    for (const p of px){ const x=p%GW, y=(p/GW)|0, dd=Math.hypot(x-cx,y-cy); if (dd>md){ md=dd; tx=x; ty=y; } }
+    const rEq = Math.sqrt(px.length/Math.PI);
+    const open = Math.max(0, Math.min(1, (md/rEq - 1.5)/1.1));
+    const c = mapV(cx/GW, cy/GH), t = mapV(tx/GW, ty/GH);
+    res.push({x:c.x, y:c.y, open, tip:t, area:px.length});
+  }
+  if (res.length === 2 && res[1].area < res[0].area*.25) res.pop();   // Rauschen ignorieren
+  res.sort((a,b)=>a.x-b.x);
+  // Wisch-Geschwindigkeit
+  let fast = false;
+  res.forEach((h,i)=>{ const pc = prevCent[i]; if (pc && dist(pc,h) > base()*.12) fast = true; });
+  prevCent = res.map(h=>({x:h.x,y:h.y}));
+  camHands = res; if (res.length) lastHandsAt = performance.now();
+  if (fast) S.burst = 1;
+  // Debug-Vorschau der erkannten Flächen
+  const im = dctx.createImageData(GW,GH);
+  for (let i=0;i<GW*GH;i++){ const v = mask[i]?255:0; im.data[i*4]=v*.37; im.data[i*4+1]=v; im.data[i*4+2]=v*.88; im.data[i*4+3]=255; }
+  dctx.putImageData(im,0,0);
+}
+
+// ---------- Maus/Finger als Ersatz ----------
+const ptr = {x:W/2, y:H/2, down:false, active:false, last:0, px:W/2, py:H/2, wheel:0};
+addEventListener("pointermove", e=>{ const f = Math.hypot(e.clientX-ptr.x, e.clientY-ptr.y);
+  if (f > base()*.1) S.burst = 1; ptr.x=e.clientX; ptr.y=e.clientY; ptr.active=true; ptr.last=performance.now(); });
+addEventListener("pointerdown", e=>{ ptr.down=true; ptr.x=e.clientX; ptr.y=e.clientY; ptr.active=true; ptr.last=performance.now(); });
+addEventListener("pointerup", ()=>{ ptr.down=false; });
+addEventListener("wheel", e=>{ ptr.wheel = Math.max(-1.2,Math.min(1.2, ptr.wheel - e.deltaY*.002)); ptr.last=performance.now(); },{passive:true});
+
+// ---------- Start ----------
+const startEl = document.getElementById("start"), err = document.getElementById("err");
+document.getElementById("nocam").onclick = ()=>{ startEl.style.display="none"; msg.textContent="Maus oder Finger bewegen · gedrückt halten = Faust · Mausrad = Zoom"; };
+document.getElementById("go").onclick = async ()=>{
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({video:{width:640,height:360,facingMode:"user"},audio:false});
+    video.srcObject = stream; await video.play(); camOn = true;
+    startEl.style.display = "none"; dbg.style.display = "block";
+  } catch(e){
+    err.textContent = "Kamera ist in dieser Ansicht blockiert. Nimm 'Ohne Kamera' oder öffne die Seite in einem eigenen Tab.";
+  }
+};
+
+// ---------- Steuerung ----------
+function control(now){
+  const b = base();
+  let hs = [];
+  if (camOn && video.readyState >= 2) { detect(); hs = camHands.filter(()=>now-lastHandsAt<400); }
+  let usingPtr = false;
+  if (!hs.length && ptr.active && now-ptr.last < 4000){
+    usingPtr = true;
+    hs = [{x:ptr.x, y:ptr.y, open: ptr.down ? 0 : .6 + ptr.wheel*.4, tip:{x:ptr.x,y:ptr.y}}];
+  }
+  ptr.wheel *= .97;
+  S.tips = hs.map(h=>h.tip);
+  if (!hs.length){
+    S.tcx=W/2; S.tcy=H/2; S.tR=b*.22; S.tSpread=.3; S.rotV=lerp(S.rotV,.003,.05);
+    if (camOn) msg.textContent = "Bewege die Hände – Schnelle Bewegungen werden erkannt";
+  } else if (hs.length >= 2){
+    const a=hs[0], c=hs[1];
+    S.tcx=(a.x+c.x)/2; S.tcy=(a.y+c.y)/2; S.tR=Math.max(b*.06, dist(a,c)/2);
+    S.tSpread=(a.open+c.open)/2; S.rotV=lerp(S.rotV, Math.sin(Math.atan2(c.y-a.y,c.x-a.x))*.04+.01, .1);
+    msg.textContent = "Zwei Hände: Abstand = Zoom";
+  } else {
+    const h = hs[0];
+    S.tcx=h.x; S.tcy=h.y; S.tR=b*(.07+.28*h.open); S.tSpread=h.open; S.rotV=lerp(S.rotV,.02,.1);
+    msg.textContent = usingPtr ? "Zeiger: gedrückt = Faust, Mausrad = Zoom" : (h.open<.25 ? "Faust: Kreis zieht sich zusammen" : "Eine Hand: Öffnung = Größe");
+  }
+}
+
+function frame(t){
+  control(t);
+  S.cx=lerp(S.cx,S.tcx,.14); S.cy=lerp(S.cy,S.tcy,.14); S.R=lerp(S.R,S.tR,.12);
+  S.spread=lerp(S.spread,S.tSpread,.1); S.rot+=S.rotV; S.burst*=.94; S.hue=(S.hue+.4+S.spread*1.2)%360;
+
+  ctx.globalCompositeOperation="source-over"; ctx.fillStyle="#05060d"; ctx.fillRect(0,0,W,H);
+  if (camOn && video.readyState>=2){
+    const vw=video.videoWidth, vh=video.videoHeight, sc=Math.max(W/vw,H/vh);
+    ctx.save(); ctx.translate(W,0); ctx.scale(-1,1); ctx.globalAlpha=.55;
+    ctx.drawImage(video,(W-vw*sc)/2,(H-vh*sc)/2,vw*sc,vh*sc); ctx.restore(); ctx.globalAlpha=1;
+    ctx.fillStyle="rgba(5,6,13,.35)"; ctx.fillRect(0,0,W,H);
+  }
+
+  ctx.globalCompositeOperation="lighter";
+  const wob=S.spread, tilt=.55+.45*Math.sin(t*.0004);
+  for (let i=0;i<N;i++){
+    const p=P[i]; p.a+=.004*p.sp+S.rotV*.4;
+    const ring=1+p.off*(.08+wob*.9)+Math.sin(t*.002+p.layer*20)*.03*(1+wob*3), ang=p.a+S.rot;
+    const tx=S.cx+Math.cos(ang)*S.R*ring;
+    const ty=S.cy+Math.sin(ang)*S.R*ring*(.8+tilt*.2)+Math.sin(ang*3+t*.002)*S.R*.05*wob;
+    p.vx+=(tx-p.x)*.035; p.vy+=(ty-p.y)*.035;
+    for (const f of S.tips){ const dx=f.x-p.x, dy=f.y-p.y, d2=dx*dx+dy*dy;
+      if (d2<22000){ const g=1400/(d2+400); p.vx+=dx*g*.02; p.vy+=dy*g*.02; } }
+    if (S.burst>.6 && Math.random()<.08){ const a=Math.random()*6.283, v=10+Math.random()*26; p.vx+=Math.cos(a)*v; p.vy+=Math.sin(a)*v; }
+    p.vx*=.88; p.vy*=.88; p.x+=p.vx; p.y+=p.vy;
+    const sp=Math.min(1,Math.hypot(p.vx,p.vy)/14), h=(S.hue+p.layer*90+ang*57.3*.15+sp*60)%360;
+    ctx.fillStyle=`hsla(${h},95%,${55+sp*30}%,${.35+sp*.5})`;
+    const s=p.size*(1+sp*1.6+S.burst*.8); ctx.fillRect(p.x-s/2,p.y-s/2,s,s);
+  }
+  const g=ctx.createRadialGradient(S.cx,S.cy,0,S.cx,S.cy,S.R*.9);
+  g.addColorStop(0,`hsla(${S.hue},90%,60%,${.06+S.burst*.2})`); g.addColorStop(1,"transparent");
+  ctx.fillStyle=g; ctx.fillRect(S.cx-S.R,S.cy-S.R,S.R*2,S.R*2);
+  ctx.globalCompositeOperation="source-over"; ctx.fillStyle="rgba(255,255,255,.8)";
+  for (const f of S.tips){ ctx.beginPath(); ctx.arc(f.x,f.y,3,0,6.283); ctx.fill(); }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
